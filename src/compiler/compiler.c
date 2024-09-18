@@ -73,22 +73,23 @@ void LBL(uint8_t* memory, int* index, const char* label_name) {
 }
 
 /*
-call label, expects RET instruction
+call label, expects RET instruction. 
+effective size can vary due to LPC instruction loading the next instruction's address.
 */
 void CALL(uint8_t* memory, int* index, const char* function_name) {
-    gb(memory, index, "LPC", rH, "");
-    gb(memory, index, "PUSH", rH, ""); // 1 bytes
-    gb(memory, index, "PUSH", rL, ""); // 2 bytes
-    init_label_director(memory, index, function_name); // 6 bytes
-    gb(memory, index, "_JNZ", "$1", ""); // 7 bytes
+    gb(memory, index, "LPC", rH, "");                   // 1 byte,  0 bytes if unconditional
+    gb(memory, index, "PUSH", rH, "");                  // 2 bytes, 1 byte if unconditional
+    gb(memory, index, "PUSH", rL, "");                  // 3 bytes, 2 bytes if unconditional
+    init_label_director(memory, index, function_name);  // 7 bytes, 6 bytes if unconditional
+    gb(memory, index, "_JNZ", "$1", "");                // 8 bytes, 7 bytes if unconditional
 }
 
 /*
 jump to label, does not expect RET instruction
 */
 void JMP(uint8_t* memory, int* index, const char* function_name) {
-    init_label_director(memory, index, function_name); // 4 bytes
-    gb(memory, index, "_JNZ", "$1", ""); // 5 bytes
+    init_label_director(memory, index, function_name);  // 4 bytes
+    gb(memory, index, "_JNZ", "$1", "");                // 5 bytes
 }
 
 /*
@@ -97,9 +98,9 @@ pop LH from stack, jump 7 bytes from popped address to skip call logic
 void RET(uint8_t* memory, int* index) {
     gb(memory, index, "POP", rL, "");
     gb(memory, index, "POP", rH, "");
-    gb(memory, index, "AND", rF, "$0xEF");
-    gb(memory, index, "ADC", rL, "$0x7");
-    gb(memory, index, "ADC", rH, "$0");
+    gb(memory, index, "AND", rF, "$0xEF");  // clear carry flag
+    gb(memory, index, "ADC", rL, "$0x7");   // 7 byte offset from unconditional call
+    gb(memory, index, "ADC", rH, "$0");     // carry if needed
     gb(memory, index, "_JNZ", "$1", "");
 }
 
@@ -107,26 +108,26 @@ void RET(uint8_t* memory, int* index) {
 conditional call if F != 0
 */
 void CALL_c(uint8_t* memory, int* index, const char* function_name) {
-    gb(memory, index, "LPC", rH, ""); // doesn't matter
-    gb(memory, index, "CMP", rF, rF); // 2
-    gb(memory, index, "ADC", rL, "$0x11"); // 4
-    gb(memory, index, "ADC", rH, "$0"); // 6
-    gb(memory, index, "AND", rF, "$0x20"); // 8
-    gb(memory, index, "_JNZ", rF, ""); // 9
-    CALL(memory, index, function_name); // 8 + 9
+    gb(memory, index, "LPC", rH, "");
+    gb(memory, index, "CMP", rF, rF);       // 2 bytes
+    gb(memory, index, "ADC", rL, "$0x11");  // 4 bytes (skip 17 bytes if F != 0)
+    gb(memory, index, "ADC", rH, "$0");     // 6 bytes
+    gb(memory, index, "AND", rF, "$0x20");  // 8 bytes (check if zero flag is set from CMP)
+    gb(memory, index, "_JNZ", rF, "");      // 9 bytes
+    CALL(memory, index, function_name);     // 9 bytes + 8 bytes -> 0x11 bytes skip if fail CMP
 }
 
 /*
 conditional jump if F != 0
 */
 void JUMP_c(uint8_t* memory, int* index, const char* function_name) {
-    gb(memory, index, "LPC", rH, ""); // doesn't matter
-    gb(memory, index, "CMP", rF, rF); // 8
-    gb(memory, index, "ADC", rL, "$0xE"); // 4
-    gb(memory, index, "ADC", rH, "$0"); // 6
-    gb(memory, index, "AND", rF, "$0x20"); // 10
-    gb(memory, index, "_JNZ", rF, ""); // 11
-    JMP(memory, index, function_name); // 9 bytes - 5 bytes -> 0x10
+    gb(memory, index, "LPC", rH, "");
+    gb(memory, index, "CMP", rF, rF);       // 2 bytes
+    gb(memory, index, "ADC", rL, "$0xE");   // 4 bytes (skip 14 bytes if F != 0)
+    gb(memory, index, "ADC", rH, "$0");     // 6 bytes
+    gb(memory, index, "AND", rF, "$0x20");  // 8 bytes (check if zero flag is set from CMP)
+    gb(memory, index, "_JNZ", rF, "");      // 9 bytes
+    JMP(memory, index, function_name);      // 9 bytes + 5 bytes -> 0xE bytes skip if fail CMP
 }
 
 /*

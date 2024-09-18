@@ -35,14 +35,14 @@ OPCODE(')   NAME        ARG1        ARG2        SIZE (b)
 ```
 ====MACROS====
 ```
-JMP
-JNZ
-CALL
-CNZ
-ADD
-SUB
-DB
-static
+JMP label
+JNZ label
+CALL label
+CNZ label
+ADD r1 r2
+SUB r1 r2
+DB address value
+static name value
 ```
 ====MEMORY====
 ```
@@ -58,6 +58,12 @@ static
 ====FLAGS====
 ```
 F: xyzwabcd
+
+OPERATIONS:
+x - less than
+y - equal
+z - zero
+w - carry
 
 FS READ:
 a - R SUCCESSFUL

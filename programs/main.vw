@@ -8,6 +8,7 @@ static FLAG_EQ      $0x40
 static DFILE_NUM    $0xE006
 static FILE_CURR    $0xE001
 static FILE_MODE    $0xE005
+static VIDEO_HIGH   $0xA0
 
 DB CHAR_TYPE@ $0xFF     ; character type
 DB CHAR_IDX@ $0x00      ; current char index
@@ -898,7 +899,7 @@ offset_by_num:
     MW A D          ; copy D to A
     MW B $0x2       ; 2 bytes per char on row
     CALL MUL        ; CD now contains offset
-    MW A $0xA0      ; load high byte of video location
+    MW A VIDEO_HIGH@      ; load high byte of video location
     CLR B      ; load low byte of video location
 
     CLR F         ; clear flags
@@ -927,7 +928,7 @@ init_buffer:
     RET
 
 clear_screen:
-    MW C $0xA0
+    MW C VIDEO_HIGH@
     CLR D
     CLR A
     CLR F

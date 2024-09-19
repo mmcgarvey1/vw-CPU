@@ -5,7 +5,7 @@ toy cpu with:
 * 8 single-byte registers*
 * 16-bit PC and SP
 * support for interfacing with up to 256 devices
-* custom assembly-esque language
+* custom assembly-esque language with assembler
 * 256x256 display with 2-bit color
 
 ====INSTRUCTIONS====

@@ -147,7 +147,7 @@ void resolve_labels(uint8_t* memory) {
 }
 
 /*
-compiles instructions and common macros to binary
+assembles instructions and common macros to binary
 */
 void parse_line(const char *line, uint8_t *memory, int *index) {
     char arg1[256] = "";

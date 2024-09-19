@@ -81,7 +81,7 @@ void reg_const_c(char *buffer, uint8_t *memory, int *address, int *offset) {
     (*address)++;
 }
 
-void decompile_instruction(char *buffer, uint8_t *memory, int address, int *offset) {
+void deassemble_instruction(char *buffer, uint8_t *memory, int address, int *offset) {
     switch (opcode_mask(memory[address])) {
         case 0b0000:
             *offset += snprintf(buffer + *offset, BUFFER_SIZE - *offset, "NUL\n");
@@ -229,7 +229,7 @@ void print_CPU_state(struct CPU *cpu, int clear) {
     offset += snprintf(buffer + offset, BUFFER_SIZE - offset, "PC: 0x%04X\n", cpu->PC);
     offset += snprintf(buffer + offset, BUFFER_SIZE - offset, "SP: 0x%04X\n", cpu->SP);
 
-    decompile_instruction(buffer, cpu->MEM, cpu->PC, &offset);
+    deassemble_instruction(buffer, cpu->MEM, cpu->PC, &offset);
     offset--;
 
     offset += snprintf(buffer + offset, BUFFER_SIZE - offset, "         \n");

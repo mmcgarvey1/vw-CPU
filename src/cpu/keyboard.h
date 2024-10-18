@@ -75,6 +75,6 @@ unsigned int ctrl_convert(SDL_Keycode key) {
         case 1073742048:
             return 255;
     }
-    printf("key: %d", key);
+    //printf("key: %d", key);
     return 255; // key not found
 }
